@@ -199,7 +199,7 @@
   }
 
   function refresh(){
-    ui.busy = true; render();
+    if (ui.loaded){ ui.busy = true; render(); } // only re-render here on a later refresh; the initial load's "loading" screen is already shown by the caller
     return apiGet().then(function(data){
       applyState(data); ui.busy = false; render();
     }).catch(function(e){
