@@ -134,8 +134,31 @@
 </style>
 </head>
 <body>
-<div class="app" id="app"></div>
+<div class="app" id="app">
+  <div style="padding:40px 20px;text-align:center;color:#52625B;font-family:sans-serif;">Starting up…</div>
+</div>
 
+<script>
+  // Safety net: if anything at all goes wrong, show it in plain text on the page
+  // instead of a silent blank screen.
+  function showFatalError(msg){
+    var app = document.getElementById("app");
+    if (app) app.innerHTML =
+      '<div style="max-width:600px;margin:40px auto;padding:20px;background:#ECDAD3;border:1px solid #A24E39;border-radius:10px;color:#1C2A25;font-family:sans-serif;line-height:1.5;">' +
+      '<strong>Something went wrong loading the page:</strong><br><br>' +
+      '<code style="background:#fff;padding:6px;border-radius:4px;display:block;white-space:pre-wrap;word-break:break-word;">' +
+      String(msg).replace(/</g,"&lt;") + '</code><br>' +
+      'Please copy this exact message and send it back so it can be fixed.</div>';
+  }
+  window.onerror = function(msg, url, line, col){
+    showFatalError(msg + " (line " + line + ", column " + col + ")");
+    return false;
+  };
+  window.addEventListener("unhandledrejection", function(ev){
+    var reason = ev.reason;
+    showFatalError((reason && reason.message) ? reason.message : String(reason));
+  });
+</script>
 <script>
 (function(){
   "use strict";
@@ -644,7 +667,11 @@
     return box;
   }
 
-  render();
+  try{
+    render();
+  }catch(err){
+    showFatalError((err && err.message) ? err.message : String(err));
+  }
 })();
 </script>
 </body>
