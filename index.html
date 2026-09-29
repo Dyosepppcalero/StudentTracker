@@ -263,6 +263,7 @@
     var e = document.createElement(tag);
     attrs = attrs || {};
     for (var k in attrs){
+      if (attrs[k] === null || attrs[k] === undefined) continue;
       if (k==="class") e.className = attrs[k];
       else if (k==="html") e.innerHTML = attrs[k];
       else if (k.indexOf("on")===0) e.addEventListener(k.slice(2), attrs[k]);
