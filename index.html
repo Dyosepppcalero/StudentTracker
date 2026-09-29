@@ -179,15 +179,21 @@
   function uid(){ return "id-" + Math.random().toString(36).slice(2) + Date.now(); }
 
   /* ---------------- API layer ---------------- */
+  function withTimeout(promise, ms){
+    return new Promise(function(resolve, reject){
+      var t = setTimeout(function(){ reject(new Error("Request timed out — check your internet connection and try again.")); }, ms);
+      promise.then(function(v){ clearTimeout(t); resolve(v); }, function(e){ clearTimeout(t); reject(e); });
+    });
+  }
   function apiGet(){
-    return fetch(API_URL, { method:"GET" }).then(function(r){ return r.json(); });
+    return withTimeout(fetch(API_URL, { method:"GET" }).then(function(r){ return r.json(); }), 15000);
   }
   function apiPost(action, payload){
-    return fetch(API_URL, {
+    return withTimeout(fetch(API_URL, {
       method:"POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" }, // avoids CORS preflight against Apps Script
       body: JSON.stringify({ action:action, payload:payload })
-    }).then(function(r){ return r.json(); });
+    }).then(function(r){ return r.json(); }), 15000);
   }
 
   function applyState(data){
@@ -415,7 +421,7 @@
     }
     var name = studentName(cls.id, studentId);
     var pts = points[studentId] || 0;
-    return el("button", { class:"seat"+(ui.editSeats?" edit-mode":""), disabled: ui.busy ? "true" : null, onclick:function(){
+    return el("button", { class:"seat"+(ui.editSeats?" edit-mode":""), onclick:function(){
       if (ui.editSeats) openModal("assignseat", {seatIndex: idx});
       else giveRecitationPoint(cls, studentId);
     } }, [
